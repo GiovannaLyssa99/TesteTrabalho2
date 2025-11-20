@@ -1,0 +1,90 @@
+﻿CRISP-DM para o Chatbot Inova
+
+
+1. Entendimento do Negócio (Concluído)
+* Objetivo principal do sistema:
+ O Chatbot Inova é uma solução inteligente que visa auxiliar pesquisadores e inventores com informações relevantes sobre proteção intelectual e fomento à inovação. O objetivo é proporcionar um atendimento automatizado, acessível e personalizado, com linguagem simples e contextualizada, para apoiar a tomada de decisão em processos técnicos como patenteamento, proteção de software, sigilo e busca de financiamento.
+* Problemas/Desafios que o agente irá resolver:
+ Pesquisadores e instituições enfrentam desafios significativos que dificultam o processo de inovação. Entre eles estão os processos de patenteamento burocráticos e a dificuldade na redação técnica dos pedidos de patente. Além disso, a linguagem inacessível e a dificuldade de acesso a editais de fomento criam barreiras para a proteção e o financiamento de novas tecnologias. Internamente, o suporte manual e individualizado a pesquisadores não é escalável, o que, somado à necessidade de treinamento constante e à dificuldade em acompanhar as atualizações dos processos, compromete a agilidade e a eficiência.
+* Usuários-alvo:
+ Pesquisadores, comunidade acadêmica 
+
+2. Entendimento dos Dados (Em desenvolvimento)
+   * Fontes de dados/documentos disponíveis:
+ Ex: Cartilhas do INPI, documentos da Apoema, editais anteriores, artigos, base de conhecimento interna.
+
+   * Tipos e formatos de dados:
+ Ex: PDFs, DOCs, HTML, planilhas.
+
+   * Problemas de dados identificados:
+ Ex: Desatualização, duplicidade, baixa qualidade OCR, falta de estrutura.
+
+   * Estratégia de curadoria e validação:
+ Validação com especialistas da Apoema antes de indexação.
+
+3. Preparação dos Dados (Em desenvolvimento)
+      * Técnicas de pré-processamento utilizadas:
+Transformação de pdf para texto em markdown, Limpeza do markdown (remoção de linhas, quebras de linha e espaços desnecessários)
+      * Estratégia de chunking (divisão dos dados):
+Separação com splitter de markdown com divisão em chunks de 700 tokens e overlap de 100
+      * Geração de embeddings (modelo usado):
+ Utilização de dois modelos de embeddings: “multilingual-e5-large” para dense embeddings e “bm25” para sparse embeddings
+      * Ferramenta/base vetorial usada:
+ Qdrant com coleção composta por dois vetores (denso e esparso) para busca hibrida
+      * Pipeline de ingestão automatizada?
+Sim. O pipeline é composto pelas etapas de pré-processamento, chunking, embeddings/inserção
+4. Modelagem (Em desenvolvimento)
+         * Framework/orquestrador do agente:
+ Ex: LangChain + FastAPI
+
+         * Arquitetura geral (resumo):
+ Ex: Entrada → Roteamento → RAG → Geração de resposta → Pós-processamento.
+
+         * Ferramentas adicionais do agente:
+ Ex: Simulador de patenteabilidade, localizador de editais, assistente de redação de pedidos.
+
+         * Prompt base usado no agente (resumo):
+ Ex: “Você é um especialista em propriedade intelectual que responde com base apenas nos documentos indexados...”
+
+         * Técnicas de controle de alucinação:
+ Ex: Comparação com trechos recuperados, verificação de confiança semântica, fallback em caso de baixa confiança.
+
+5. Avaliação (Não iniciado)
+            * Como será avaliado o desempenho do agente:
+ Ex: Respostas verificadas por especialistas, testes com perguntas reais.
+
+            * Métricas utilizadas:
+ Ex: Acurácia semântica, tempo médio de resposta, taxa de fallback, satisfação do usuário.
+
+            * Cenários de testes definidos:
+ Ex: Perguntas sobre redação de patentes, critérios de patenteabilidade, localização de editais, fluxo de proteção.
+
+            * Feedback dos usuários será coletado?
+ 
+6. Implantação (Não iniciado)
+               * Ambiente de deploy (produção):
+ Ex: API Python com Docker + Frontend em React.
+
+               * Integrações externas:
+
+               * Plano de monitoramento:
+ Ex: Logs das interações, coleta de erros, alertas de falha no RAG.
+
+               * Backup e segurança:
+ Ex: Backup da base vetorial, controle de acesso à API, política de privacidade.
+
+7. Interface do Usuário (Frontend) (Em desenvolvimento)
+                  * Plataforma onde o usuário interage com o agente:
+ 
+                  * Frameworks ou tecnologias utilizadas:
+
+                  * Integração com o backend/agente:
+ Via API REST
+
+                  * Funcionalidades visíveis para o usuário:
+ Ex: Chat com histórico, upload de documentos, avaliação da resposta.
+
+                  * Acessibilidade e usabilidade:
+
+                  * Identidade visual e adaptação ao público-alvo:
+ Layout institucional, linguagem simples e objetiva.

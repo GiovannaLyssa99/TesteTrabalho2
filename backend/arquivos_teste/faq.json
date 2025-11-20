@@ -1,0 +1,202 @@
+[
+  {
+    "pergunta": "O que é a Lei nº 9.279/1996?",
+    "resposta": "É a Lei da Propriedade Industrial (LPI) que regula direitos e obrigações relativos a patentes, marcas, desenhos industriais e repressão às falsas indicações geográficas no Brasil."
+  },
+  {
+    "pergunta": "Qual a função da Lei nº 9.610/1998?",
+    "resposta": "Regula os direitos autorais no Brasil, protegendo obras intelectuais como textos, músicas, artes visuais, entre outros."
+  },
+  {
+    "pergunta": "O que trata a Lei nº 9.609/1998?",
+    "resposta": "É a Lei de Proteção de Programas de Computador, que protege os direitos dos desenvolvedores de software."
+  },
+  {
+    "pergunta": "Qual a importância da Lei nº 13.123/2015?",
+    "resposta": "Regula o acesso ao patrimônio genético e ao conhecimento tradicional associado, além da repartição de benefícios."
+  },
+  {
+    "pergunta": "O que estabelece a Lei nº 10.196/2001?",
+    "resposta": "Dispõe sobre incentivos fiscais para inovação tecnológica e pesquisa científica e tecnológica."
+  },
+  {
+    "pergunta": "Para que serve o Manual Básico de Patentes de Invenção?",
+    "resposta": "Auxilia inventores e empresas a entenderem o processo de depósito e registro de patentes."
+  },
+  {
+    "pergunta": "O que é o Guia rápido de Publicação do Pedido de Patente?",
+    "resposta": "Um documento que orienta sobre os procedimentos para a publicação do pedido de patente no INPI."
+  },
+  {
+    "pergunta": "Como funciona o Guia rápido de Solicitação de Exame Técnico?",
+    "resposta": "Explica como solicitar o exame técnico do pedido de patente para que ele seja avaliado pelo INPI."
+  },
+  {
+    "pergunta": "O que aborda o Guia rápido sobre classificação de patente?",
+    "resposta": "Ensina como classificar corretamente uma invenção segundo a classificação internacional de patentes."
+  },
+  {
+    "pergunta": "Para que serve o Manual do Usuário para o Registro Eletrônico de Programas de Computador?",
+    "resposta": "Orienta sobre o procedimento para registrar software eletronicamente no INPI."
+  },
+  {
+    "pergunta": "O que é a Instrução Normativa DIRPA nº 30/2013?",
+    "resposta": "Norma que estabelece procedimentos para o exame e concessão de patentes no INPI."
+  },
+  {
+    "pergunta": "Qual o objetivo da Norma de Execução DIRPA nº 1/2019?",
+    "resposta": "Define regras para o processamento de pedidos de marcas no INPI."
+  },
+  {
+    "pergunta": "O que trata a Norma de Execução DIRPA nº 7/2019?",
+    "resposta": "Estabelece procedimentos para o registro de programas de computador."
+  },
+  {
+    "pergunta": "O que é a Portaria INPI/PR Nº 10 DE 09 de Maio de 2025?",
+    "resposta": "Documento que dispõe sobre atualizações e diretrizes administrativas do INPI."
+  },
+  {
+    "pergunta": "Para que servem as Resoluções PR nº 85 e 93 de 2013?",
+    "resposta": "Regulamentam aspectos técnicos e administrativos para o processamento de pedidos no INPI."
+  },
+  {
+    "pergunta": "O que estabelece a Resolução nº 124 de 2013?",
+    "resposta": "Define critérios para a análise técnica de patentes."
+  },
+  {
+    "pergunta": "Qual a finalidade da RESOLUÇÃO INPI/PR Nº 208, DE 27 DE DEZEMBRO DE 2017?",
+    "resposta": "Atualiza procedimentos para o exame de pedidos de patentes."
+  },
+  {
+    "pergunta": "O que trata a RESOLUÇÃO INPI Nº 187, DE 27 DE ABRIL DE 2017?",
+    "resposta": "Estabelece normas para o registro de marcas."
+  },
+  {
+    "pergunta": "Para que servem as RESOLUÇÕES INPI/PR Nº 240 e 241, DE 03 DE JULHO DE 2019?",
+    "resposta": "Regulamentam procedimentos para o depósito e exame de desenhos industriais."
+  },
+  {
+    "pergunta": "O que é o PCT?",
+    "resposta": "O Patent Cooperation Treaty é um tratado internacional que facilita o depósito de pedidos de patente em múltiplos países."
+  },
+  {
+    "pergunta": "Como funciona a Fase Internacional do PCT?",
+    "resposta": "Permite o depósito único do pedido de patente que será reconhecido em vários países membros."
+  },
+  {
+    "pergunta": "O que é a Fase Nacional do PCT?",
+    "resposta": "Momento em que o pedido internacional é submetido para exame em cada país onde se deseja proteção."
+  },
+  {
+    "pergunta": "Onde encontrar as tabelas de taxas do PCT?",
+    "resposta": "No documento 'PCT Fee Tables' disponibilizado pela WIPO."
+  },
+  {
+    "pergunta": "Qual a vantagem do PCT para inventores brasileiros?",
+    "resposta": "Facilita o processo de proteção internacional, reduzindo custos e prazos."
+  },
+  {
+    "pergunta": "O que é a Convenção Europeia de Patentes (EPC)?",
+    "resposta": "Tratado que regula o sistema de concessão de patentes na Europa via o Escritório Europeu de Patentes (EPO)."
+  },
+  {
+    "pergunta": "O que são as Guidelines do EPO?",
+    "resposta": "Diretrizes que orientam o exame e concessão de patentes pelo EPO."
+  },
+  {
+    "pergunta": "O que são desenhos industriais?",
+    "resposta": "São a forma plástica ornamental de um objeto ou conjunto ornamental de linhas e cores que pode ser aplicado a um produto."
+  },
+  {
+    "pergunta": "Como proteger desenhos industriais internacionalmente?",
+    "resposta": "Através do sistema de registro internacional da WIPO para desenhos industriais."
+  },
+  {
+    "pergunta": "Onde encontrar o guia da WIPO sobre desenhos industriais?",
+    "resposta": "No documento 'WIPO – Industrial Designs Guide'."
+  },
+  {
+    "pergunta": "Como solicitar o exame técnico de um pedido de patente no INPI?",
+    "resposta": "Por meio do Guia rápido de Solicitação de Exame técnico, seguindo os prazos e requisitos indicados."
+  },
+  {
+    "pergunta": "Quais são os principais incentivos fiscais para inovação no Brasil?",
+    "resposta": "Previsto na Lei nº 10.196/2001, inclui deduções fiscais para empresas que investem em pesquisa e desenvolvimento."
+  },
+  {
+    "pergunta": "O que é uma patente de invenção?",
+    "resposta": "Direito exclusivo concedido para uma nova invenção que atenda aos requisitos de novidade, atividade inventiva e aplicação industrial."
+  },
+  {
+    "pergunta": "Qual a diferença entre patente de invenção e modelo de utilidade?",
+    "resposta": "A patente de invenção protege novas invenções, enquanto o modelo de utilidade protege melhorias funcionais em objetos já existentes."
+  },
+  {
+    "pergunta": "Como funciona o registro eletrônico de programas de computador?",
+    "resposta": "É feito via sistema eletrônico do INPI, conforme o Manual do Usuário para o Registro Eletrônico de Programas de Computador."
+  },
+  {
+    "pergunta": "O que é uma marca?",
+    "resposta": "Sinal distintivo visualmente perceptível que identifica produtos ou serviços de uma empresa."
+  },
+  {
+    "pergunta": "Como registrar uma marca no INPI?",
+    "resposta": "Seguindo o Manual de Marcas, realizando o depósito do pedido e acompanhando o processo até a concessão."
+  },
+  {
+    "pergunta": "O que é uma licença de uso de patente?",
+    "resposta": "Autorização concedida pelo titular da patente para que terceiros explorem a invenção."
+  },
+  {
+    "pergunta": "Como funciona a oferta de licença no INPI?",
+    "resposta": "Regulada pelo Guia rápido sobre Oferta de Licença, que orienta sobre divulgação e formalização."
+  },
+  {
+    "pergunta": "Quais são os prazos para depósito de patente no Brasil?",
+    "resposta": "O pedido deve ser feito antes da divulgação pública da invenção para garantir a novidade."
+  },
+  {
+    "pergunta": "O que é exame de novidade?",
+    "resposta": "Avaliação para verificar se a invenção é nova e não foi divulgada anteriormente."
+  },
+  {
+    "pergunta": "Como é feita a classificação de patentes?",
+    "resposta": "Segundo o Guia rápido sobre classificação de patente, utilizando a Classificação Internacional de Patentes (CIP)."
+  },
+  {
+    "pergunta": "O que é o INPI?",
+    "resposta": "Instituto Nacional da Propriedade Industrial, órgão responsável pelo registro e concessão de direitos de propriedade intelectual no Brasil."
+  },
+  {
+    "pergunta": "Quais são os tipos de propriedade intelectual protegidos pelo INPI?",
+    "resposta": "Patentes, marcas, desenhos industriais, programas de computador, indicações geográficas, entre outros."
+  },
+  {
+    "pergunta": "O que é uma indicação geográfica?",
+    "resposta": "Nome ou sinal que identifica um produto como originário de uma região específica, com qualidade ou características atribuídas ao local."
+  },
+  {
+    "pergunta": "Como proteger uma indicação geográfica?",
+    "resposta": "Por meio do registro no INPI, conforme previsto na Lei nº 9.279/1996."
+  },
+  {
+    "pergunta": "O que é o exame técnico de patente?",
+    "resposta": "Análise detalhada do pedido para verificar se atende aos requisitos legais para concessão."
+  },
+  {
+    "pergunta": "Quais documentos são necessários para o depósito de patente?",
+    "resposta": "Descrição detalhada da invenção, reivindicações, desenhos técnicos e resumo."
+  },
+  {
+    "pergunta": "O que é um pedido de patente?",
+    "resposta": "Documento formal que inicia o processo de proteção da invenção junto ao INPI."
+  },
+  {
+    "pergunta": "Como acompanhar o andamento do pedido de patente?",
+    "resposta": "Pelo sistema eletrônico do INPI, consultando o processo pelo número do pedido."
+  },
+  {
+    "pergunta": "O que acontece se o pedido de patente for indeferido?",
+    "resposta": "O requerente pode apresentar recurso ou ajustar o pedido conforme as exigências do INPI."
+  }
+]

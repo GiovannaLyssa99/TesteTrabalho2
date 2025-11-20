@@ -1,0 +1,21 @@
+
+Relatório Semanal de Atividades
+
+Período: 12-09-25 a 19-09-25
+
+1. Resumo das Atividades
+
+O foco desta semana foi o desenvolvimento de funcionalidades do módulo de administração, incluindo o pipeline completo de ingestão de arquivos e a implementação da funcionalidade de busca vetorial. Adicionalmente, foi iniciada a construção da interface de chat.
+
+2. Atividades Desenvolvidas
+
+* Pipeline de Ingestão de Arquivos: Implementação das funções principais do módulo admin, cobrindo todo o fluxo de processamento de documentos: recebimento, pré-processamento, chunking (divisão em partes), geração de embeddings e inserção no banco de dados vetorial QDrant e no Minio Storage.
+* Gerenciamento de Dados: Desenvolvimento da funcionalidade de exclusão de arquivos e seus respectivos dados no banco vetorial e no storage.
+* Busca Vetorial: Criação do método de busca e recuperação (retrieval) de informações na base vetorial QDrant, permitindo consultas por similaridade semântica.
+* API: Disponibilização dos endpoints para as funcionalidades de ingestão, exclusão e busca de arquivos.
+* Interface de Chat: Desenvolvimento da versão inicial da interface de chat.
+* Alinhamentos: Conforme reunião anterior com Jackson, foi discutido o alinhamento sobre o crawler de editais.
+
+3. Pontos de Atenção
+
+* Crawler de Editais: Jackson até o momento não disponibilizou o repositório do crawler, o que impede o início dos trabalhos de integração com a plataforma.

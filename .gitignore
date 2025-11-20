@@ -1,0 +1,14 @@
+# Ambiente virtual
+venv/
+.env/
+.venv/
+
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Arquivos de configuração locais
+*.env
+*.sqlite3

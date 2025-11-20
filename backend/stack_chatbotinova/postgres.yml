@@ -1,0 +1,27 @@
+##para criar rede
+#docker network create app_network
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_chatbotinova
+    environment:
+        POSTGRES_PASSWORD: postgresinova
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - pg_extensions:/usr/share/postgresql/15/extension
+      - pg_libs:/usr/lib/postgresql/15/lib
+    networks:
+      - chatbotinova
+    ports:
+      - "5433:5432"
+    restart: always
+
+volumes:
+  db_data:
+  pg_extensions:
+  pg_libs:
+
+networks:
+  chatbotinova:
+    external: true

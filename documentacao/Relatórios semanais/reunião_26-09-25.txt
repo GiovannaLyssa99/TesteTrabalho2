@@ -1,0 +1,20 @@
+
+Relatório Semanal de Atividades
+
+Período: 19-09-25 a 26-09-25
+
+1. Resumo das Atividades
+
+Nesta semana, o foco foi a evolução da arquitetura de inteligência artificial com a modelagem do fluxo de agentes, a integração da interface de chat com o backend e o início do desenvolvimento do módulo de gerenciamento de usuários. Adicionalmente, o código do projeto foi migrado para um novo repositório e iniciamos o planejamento da integração do crawler de editais.
+
+2. Atividades Desenvolvidas
+
+* Fluxo de Agentes de IA: Realizada a modelagem da versão inicial do fluxo de agentes de inteligência artificial e iniciado o desenvolvimento da sua implementação.
+* Integração do Chat: A interface de chat foi conectada com a API, permitindo a comunicação entre o frontend e o backend.
+* Módulo de Usuários: Iniciado o desenvolvimento do módulo de usuários, que incluiu a modelagem e criação do banco de dados, além da implementação das funcionalidades de cadastro e busca de usuários.
+* Crawler de Editais: Recebemos o acesso ao repositório do crawler e iniciamos o estudo e o planejamento da integração com a nossa solução.
+* Migração de Repositório: O código-fonte do projeto foi completamente migrado para o novo repositório.
+
+3. Pontos de Atenção
+
+* Sem pontos de atenção
