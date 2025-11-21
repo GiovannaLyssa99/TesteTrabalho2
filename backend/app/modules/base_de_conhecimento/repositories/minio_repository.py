@@ -17,7 +17,7 @@ class MinioRepository:
         self.client.make_bucket(bucket_name=self.BUCKET_NAME, location="us-west-1")
 
 
-    def insert(self, bytes: bytes, obj_name: str, metadata: dict):
+    def insert(self, bytes: bytes, obj_name: str):
         """
         Insere um object (arquivo) no bucket MinIO.
         
@@ -34,8 +34,7 @@ class MinioRepository:
             object_name=obj_name,
             data=io.BytesIO(bytes),
             length= -1,
-            part_size=1024*1024*5, 
-            metadata=metadata
+            part_size=1024*1024*5
         )
 
         print(resultado)
@@ -59,29 +58,20 @@ class MinioRepository:
             print("error occurred when deleting object - Minio", error)
         
 
-    def list_files(self):
-        """
-        Lista os objects(arquivos) do bucket MinIO.
-        
-        """
-        objects = self.client.list_objects(self.BUCKET_NAME)
-        list = []
-        for obj in objects:
-            print(obj)
-            list.append({"obj_name": obj.object_name, "metadata": obj.metadata})
-        
-        return list
 
-    def download(self, obj_name: str):
-        """
-        Faz o download de um object(arquivo) do bucket MinIO.
-        
-        Args:
-            object_name (str): object_name do arquivo a ser excluído. 
-        """
 
-        response = self.client.get_object(self.BUCKET_NAME, obj_name)
-        return [response, obj_name]
+    # def download(self, obj_name: str):
+
+    #     response = self.client.get_object(self.BUCKET_NAME, obj_name)
+    #     return [response, obj_name]
+        # try:
+        #     response = self.client.get_object(self.BUCKET_NAME, id)
+        #     #print(response.read())
+        #     return [response, id]
+        # finally:
+        #     response.close()
+        #     response.release_conn()
+
 
     # @staticmethod
     # def chunks_iter(documents, batch_size):

@@ -23,4 +23,5 @@ class ListaMsgResponse(BaseModel):
 
 class MessageInput(BaseModel):
     thread_id: str
+    user_id: Optional[int] = None
     content: str | dict

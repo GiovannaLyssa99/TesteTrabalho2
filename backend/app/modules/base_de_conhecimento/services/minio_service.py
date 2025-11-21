@@ -16,13 +16,9 @@ class MinioService:
             Exception: Se ocorrer algum erro inesperado.
         """ 
         try:
-            dict = {
-                "uploaded_by": metadata.get("uploaded_by"),
-                "tags": metadata.get("tags")
-            }
             # o nome do objeto no minio vai ser formado pelo nome do arquivo + $ + doc_id
-            obj_name = f"{metadata['file_name']}${metadata['doc_id']}"
-            self.repository.insert(bytes, obj_name, dict)
+            obj_name = f"{metadata['file_name']}${metadata['doc_id']}.pdf"
+            self.repository.insert(bytes, obj_name)
 
         except Exception as e:
             print(f"Erro ao inserir arquivo no minio: {e}")
@@ -44,22 +40,6 @@ class MinioService:
 
         except Exception as e:
             print(f"Erro ao excluir arquivo no minio: {e}")
-            raise
-
-    def listar_arquivos(self):
-        """
-        Lista os arquivos do minio.
-        
-        Raises:
-            Exception: Se ocorrer algum erro inesperado.
-        """ 
-        try:
-
-            lista = self.repository.list_files()
-            return lista
-        
-        except Exception as e:
-            print(f"Erro ao baixar arquivo no minio: {e}")
             raise
 
     def download(self, obj_name: str):

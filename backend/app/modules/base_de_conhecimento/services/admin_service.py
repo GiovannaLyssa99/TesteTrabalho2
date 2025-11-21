@@ -70,37 +70,3 @@ class AdminService:
         except Exception as e:
             print(f"Erro ao deletar documentos: {e}")
             raise
-
-    def list_files(self):
-        """
-        Lista os arquivos do minio.
-        
-        Raises:
-            Exception: Se ocorrer algum erro inesperado.
-        """ 
-        try:
-
-            lista = self.minio_service.listar_arquivos()
-            return lista
-        
-        except Exception as e:
-            print(f"Erro ao baixar arquivo no minio: {e}")
-            raise
-
-    def download_documents(self, file_name: str):
-            """
-            Faz o download de um arquivo do minio
-            
-            Args:
-                file_name (str): nome do arquivo/objeto a ser excluído.
-            
-            Raises:
-                Exception: Se ocorrer algum erro inesperado.
-            """ 
-            try:
-
-                return self.minio_service.download(file_name)
-
-            except Exception as e:
-                print(f"Erro ao deletar documentos: {e}")
-                raise

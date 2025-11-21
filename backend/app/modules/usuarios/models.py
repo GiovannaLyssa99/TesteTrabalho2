@@ -22,7 +22,7 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=True)
 
-    profile = relationship("InventorProfile", back_populates="user", uselist=False, lazy="joined")
+    profile = relationship("InventorProfile", back_populates="user", uselist=False)
 
 
 class InventorProfile(Base):

@@ -60,10 +60,8 @@ from app.api.routes.chat_agent_routes import chat_agent_router
 from app.api.routes.admin_routes import admin_router
 from app.api.routes.users_routes import router as user_router
 from app.api.routes.login_auth_routes import auth_router
-from app.api.routes.crawler_routes import crawler_router
 
 app.include_router(chat_agent_router)
 app.include_router(admin_router)
 app.include_router(user_router)
 app.include_router(auth_router)
-app.include_router(crawler_router)
