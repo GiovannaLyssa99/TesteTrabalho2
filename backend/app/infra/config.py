@@ -20,6 +20,12 @@ class Config:
     )
     DB_URI = os.getenv("DB_URI")
 
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")
+    ALGORITHM = os.getenv("ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
+
+    BASE_URL_API = os.getenv("BASE_URL_API")
+
     # REDIS_HOST = os.getenv("REDIS_HOST")
     # REDIS_PORT = os.getenv("REDIS_PORT")
     # REDIS_DB = os.getenv("REDIS_DB")

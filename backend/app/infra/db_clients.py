@@ -13,6 +13,11 @@ def get_qdrant_client() -> QdrantClient:
             url=Config.QDRANT_URL,
             api_key=Config.QDRANT_API_KEY
         )
+
+        # Para qdrant rodando local
+        # _qdrant_client = QdrantClient(
+        #     url=Config.QDRANT_URL
+        # )
     return _qdrant_client
 
 # Singleton do MinIO

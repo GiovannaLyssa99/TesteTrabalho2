@@ -12,3 +12,6 @@ def get_admin_service():
 
 def get_chat_service():
     return agent_container.chat_agent_service
+
+def get_crawler_service():
+    return container.crawler_service

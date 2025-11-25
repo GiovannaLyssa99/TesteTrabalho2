@@ -22,7 +22,7 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=True)
 
-    profile = relationship("InventorProfile", back_populates="user", uselist=False)
+    profile = relationship("InventorProfile", back_populates="user", uselist=False, lazy="joined")
 
 
 class InventorProfile(Base):
@@ -31,10 +31,11 @@ class InventorProfile(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
 
-    area_atuacao = Column(String(150), nullable=False)
-    experiencia = Column(String(255))
-    descricao_inovacao = Column(Text, nullable=False)
-    estagio_inovacao = Column(String(50))
-    palavras_chave = Column(String(255))
+    area_atuacao = Column(String(150), nullable=True)
+    experiencia = Column(String(255), nullable=True)
+    descricao_inovacao = Column(Text, nullable=True)
+    estagio_inovacao = Column(String(50), nullable=True)
+    palavras_chave = Column(String(255), nullable=True)
 
     user = relationship("User", back_populates="profile")
+    

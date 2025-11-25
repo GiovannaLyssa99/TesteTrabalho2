@@ -67,6 +67,9 @@ Também depende de serviços externos em containers Docker: **MinIO**, **Postgre
    ```
    Esse processo deve ser feito apenas uma vez, depois os arquivos ficarão salvos e qualquer outra inserção poderá ser feita via a API.
 
+7. **Rodar script de criação das tabelas no Postgres**:
+   Antes de rodar o projeto é necessário rodar os comandos de criação de tabelas presentes no arquivo scripts.sql na pasta scripts. Rode no seu gerenciador de banco de dados de preferência.
+
 ### Execução
 
 > *Guia para Execução do Ambiente de Desenvolvimento*

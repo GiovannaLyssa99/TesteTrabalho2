@@ -2,7 +2,8 @@ import asyncio
 import uuid
 from fastapi import HTTPException
 from app.modules.agent_chat.models import Conversa, Mensagem, MessageType
-from sqlalchemy.orm import Session
+from sqlalchemy import select, delete
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.agent_chat.schemas import MessageInput
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.types import Command
@@ -17,134 +18,134 @@ class ChatAgentService:
     def __init__(self, graph):
         self.graph = graph
         
-    def iniciar_conversa(self, user_id: int | None, db: Session):
-
+    async def iniciar_conversa(self, user_id: int | None, db: AsyncSession):
         try:
             conversa = Conversa(user_id=user_id)
             db.add(conversa)
-            db.commit()
-            db.refresh(conversa)
-        
+            await db.commit()
+            await db.refresh(conversa)
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             print(f"Erro ao criar conversa no postgres: {e}")
             raise
 
         return {"thread_id": str(conversa.thread_id), "user_id": conversa.user_id}
     
-    def excluir_conversa_anonima(self, thread_id: str, db: Session):
-
+    async def excluir_conversa(self, thread_id: str, db: AsyncSession):
         try:
-            conversa = db.query(Conversa).filter_by(thread_id=thread_id).first()
+            result = await db.execute(select(Conversa).where(Conversa.thread_id == thread_id))
+            conversa = result.scalar_one_or_none()
 
             if not conversa:
                 raise HTTPException(status_code=404, detail="Conversa não encontrada")
 
-            if conversa.user_id:
-                raise HTTPException(status_code=400, detail="Conversa não é anônima")
-
-            # try:
-            #     await asyncio.to_thread(self.graph.checkpointer.delete_thread, uuid.UUID(thread_id))
-            # except Exception as e:
-            #     print(f"Erro ao excluir no checkpointer: {e}")
-
-            db.delete(conversa)
-            db.commit()
-
+            await db.delete(conversa)
+            await db.commit()
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             print(f"Erro ao excluir conversa no postgres - thread_id = {thread_id}: {e}")
             raise
 
-    def salvar_mensagem(self, content: str, type: str, thread_id: str, db: Session):
-
+    async def salvar_mensagem(self, content: str, type: str, thread_id: str, db: AsyncSession):
         try:
             msg = Mensagem(content=content, type=type, conversa_id=thread_id)
             db.add(msg)
-            db.commit()
+            await db.commit()
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             print(f"Erro ao salvar mensagem no postgres - thread_id = {thread_id}: {e}")
             raise
 
-    async def send_message(self, msg: MessageInput, db: Session):
 
-        conversa = db.query(Conversa).filter_by(thread_id=msg.thread_id).first()
-
+    async def send_message(self, msg: MessageInput, db: AsyncSession):
+        conversa = await db.scalar(select(Conversa).where(Conversa.thread_id == msg.thread_id))
         print("thread coletada")
 
         if not conversa:
             raise HTTPException(status_code=404, detail="Conversa/thread não encontrada")
 
-        if msg.user_id and conversa.user_id and conversa.user_id != msg.user_id:
-            raise HTTPException(status_code=403, detail="Conversa/thread pertence a outro usuário")
-        
-        self.salvar_mensagem(content=msg.content, type=MessageType.HUMAN, thread_id=conversa.thread_id, db=db)
-        
-        result = await graph.ainvoke({"messages": [HumanMessage(msg.content, name="query")]},
-                                    context={"user_id": msg.user_id},
-                                    config={"configurable": {"thread_id": conversa.thread_id}})
+        await self.salvar_mensagem(content=msg.content, type=MessageType.HUMAN, thread_id=conversa.thread_id, db=db)
+
+        result = await graph.ainvoke(
+            {"messages": [HumanMessage(msg.content, name="query")]},
+            context={"user_id": conversa.user_id},
+            config={"configurable": {"thread_id": conversa.thread_id}},
+        )
 
         print(result)
-        
-        answer: str
-        for m in reversed(result["messages"]): 
+
+        answer = None
+        for m in reversed(result["messages"]):
             if m.content and isinstance(m, AIMessage) and not m.response_metadata.get("__is_handoff_back"):
                 answer = m.content
                 break
 
-        print("answer:" + answer)
-        self.salvar_mensagem(content=answer, type=MessageType.AI, thread_id=conversa.thread_id, db=db)
+        print("answer:" + str(answer))
+        await self.salvar_mensagem(content=answer, type=MessageType.AI, thread_id=conversa.thread_id, db=db)
 
         return {
             "thread_id": conversa.thread_id,
             "user_message": msg.content,
-            "assistant_message": answer
+            "assistant_message": answer,
         }
     
         
-    def listar_conversas_usuario(self, user_id: int, db: Session):
+    async def listar_conversas_usuario(self, user_id: int, db: AsyncSession):
         try:
-            conversas = db.query(Conversa).filter_by(user_id=user_id).all()
+            result = await db.execute(select(Conversa).where(Conversa.user_id == user_id))
+            conversas = result.scalars().all()
 
             if not conversas:
-                raise HTTPException(status_code=404, detail="Usuário não possui conversas")
-            
+                return []
+                #raise HTTPException(status_code=404, detail="Usuário não possui conversas")
+
             for conversa in conversas:
                 if not conversa.titulo or conversa.titulo.strip() == "":
-                    primeiras_msgs = (
-                        db.query(Mensagem.content)
-                        .filter(Mensagem.conversa_id == conversa.thread_id)
+                    result_msgs = await db.execute(
+                        select(Mensagem.content)
+                        .where(Mensagem.conversa_id == conversa.thread_id)
                         .order_by(Mensagem.id.asc())
                         .limit(10)
-                        .all()
                     )
+                    primeiras_msgs = result_msgs.all()
+
+                    if not primeiras_msgs:
+                        await self.excluir_conversa(conversa.thread_id, db)
+                        conversas.remove(conversa)
+                        continue
+
                     texts = "\n".join([m[0] for m in primeiras_msgs])
 
-                    if texts:
+                    if texts.strip():
                         prompt = (
                             f"Analise as mensagens a seguir e retorne um título para ser aplicado à essa conversa que represente o que está sendo discutido. "
                             f"O título deve ser uma frase concisa. Mensagens: {texts}"
                         )
-                        titulo_gerado = llm.invoke(input=prompt)
-                        conversa.titulo = titulo_gerado.content
-                        db.add(conversa)
+                        try:
+                            titulo_gerado = await llm.ainvoke(input=prompt)
+                            conversa.titulo = titulo_gerado.content
+                            db.add(conversa)
+                        except Exception as e:
+                            print(f"Erro ao gerar título para conversa {conversa.thread_id}: {e}")
+                            await db.rollback()
+                            continue
 
-            db.commit() 
-            
+            await db.commit()
         except Exception as e:
             print(f"Erro ao buscar conversas - user_id = {user_id}: {e}")
             raise
-        
+
         return conversas
     
-    def listar_historico_mensagens(self, thread_id:str, db: Session):
+    async def listar_historico_mensagens(self, thread_id: str, db: AsyncSession):
         try:
-            mensagens = db.query(Mensagem.content, Mensagem.type).filter(Mensagem.conversa_id == thread_id).all()
+            result = await db.execute(
+                select(Mensagem.content, Mensagem.type).where(Mensagem.conversa_id == thread_id)
+            )
+            mensagens = result.all()
 
             if not mensagens:
                 raise HTTPException(status_code=404, detail="Mensagens não encontradas para essa thread_id/conversa")
-            
         except Exception as e:
             print(f"Erro ao buscar mensagens - thread_id = {thread_id}: {e}")
             raise

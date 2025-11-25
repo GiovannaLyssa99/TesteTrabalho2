@@ -7,9 +7,9 @@ class Role(str, Enum):
     admin = "admin"
 
 class InventorProfileCreate(BaseModel):
-    area_atuacao: str
+    area_atuacao: Optional[str] = None
     experiencia: Optional[str] = None
-    descricao_inovacao: str
+    descricao_inovacao: Optional[str] = None
     estagio_inovacao: Optional[str] = None
     palavras_chave: Optional[str] = None
 
@@ -17,16 +17,16 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: constr(min_length=8)
-    profile: InventorProfileCreate
+    profile: Optional[InventorProfileCreate] = None
 
 class UserCreateByAdmin(UserCreate):
     role: Optional[Role] = Role.user
     is_active: Optional[bool] = True
 
 class InventorProfileRead(BaseModel):
-    area_atuacao: str
+    area_atuacao: Optional[str] = None
     experiencia: Optional[str] = None
-    descricao_inovacao: str
+    descricao_inovacao: Optional[str] = None
     estagio_inovacao: Optional[str] = None
     palavras_chave: Optional[str] = None
 

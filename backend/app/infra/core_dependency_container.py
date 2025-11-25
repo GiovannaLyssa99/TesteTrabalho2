@@ -2,6 +2,7 @@ from app.modules.base_de_conhecimento.services.pre_processamento_service import 
 from app.modules.base_de_conhecimento.services.qdrant_service import QdrantService
 from app.modules.base_de_conhecimento.services.minio_service import MinioService
 from app.modules.base_de_conhecimento.services.admin_service import AdminService
+from app.modules.crawler_editais.service import CrawlerService
 from app.modules.base_de_conhecimento.repositories.qdrant_repository import QdrantRepository
 from app.modules.base_de_conhecimento.repositories.minio_repository import MinioRepository
 
@@ -26,5 +27,6 @@ class CoreContainer:
             minio_service=self.minio_service,
             bd_vetorial_service=self.bd_vetorial_service
         )
+        self.crawler_service = CrawlerService()
 
 container = CoreContainer()

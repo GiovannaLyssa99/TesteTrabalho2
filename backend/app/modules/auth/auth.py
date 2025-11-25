@@ -11,12 +11,13 @@ from app.infra.database import get_db
 
 from app.modules.usuarios import repository as user_repository
 from app.modules.usuarios import models as user_models
+from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
-    from app.infra.config import settings
-    SECRET_KEY = settings.SECRET_KEY
-    ALGORITHM = settings.ALGORITHM
-    ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    from app.infra.config import Config
+    SECRET_KEY = Config.SECRET_KEY
+    ALGORITHM = Config.ALGORITHM
+    ACCESS_TOKEN_EXPIRE_MINUTES = Config.ACCESS_TOKEN_EXPIRE_MINUTES
 except Exception:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
     ALGORITHM = os.environ.get("ALGORITHM", "HS256")
@@ -33,7 +34,7 @@ def create_access_token(data: dict, expires_minutes: Optional[int] = None) -> st
     return token
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Não foi possível validar credenciais",
@@ -47,7 +48,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     except JWTError:
         raise credentials_exception
 
-    user = user_repository.get_user_by_id(db, int(user_id))
+    user = await user_repository.get_user_by_id(db, int(user_id))
     if not user:
         raise credentials_exception
     if not getattr(user, "is_active", True):
