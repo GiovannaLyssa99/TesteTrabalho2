@@ -7,27 +7,17 @@ class AdminService:
         self.minio_service = minio_service
         self.bd_vetorial_service = bd_vetorial_service
 
-    def upload_document(
+    async def upload_document(
         self, 
         file_bytes: bytes, 
         file_name: str, 
         uploaded_by: str, 
-        tags: list[str]
+        tags: str
     ):
         """
         Insere um ou mais arquivos do minio e qdrant
-        
-        Args:
-            file_bytes (bytes): bytes dos arquivos/objetos a serem inseridos.
-            file_names (list[str]): nomes dos arquivos/objetos a serem inseridos.
-            uploaded_by (str): usuário que fez o upload
-            tags (list[str]): tags para os metadados
-        
-        Raises:
-            Exception: Se ocorrer algum erro inesperado.
         """ 
         try:
-
             doc_id = generate_hash(file_name)
 
             metadata = {
@@ -38,10 +28,11 @@ class AdminService:
                 "insertion_date": datetime.now(timezone.utc).isoformat(),
             }
 
-            self.minio_service.inserir(file_bytes, metadata=metadata)
-            self.bd_vetorial_service.inserir(file_bytes, metadata)
 
-            self.bd_vetorial_service.inserir(file_bytes, metadata)
+            self.minio_service.inserir(file_bytes, metadata=metadata)
+            
+  
+            await self.bd_vetorial_service.inserir(file_bytes, metadata)
 
             return metadata
         
@@ -53,18 +44,13 @@ class AdminService:
     def delete_documents(self, file_names: list[str]):
         """
         Deleta um ou mais arquivos do minio e qdrant
-        
-        Args:
-            file_names (list[str]): nomes dos arquivos/objetos a serem excluídos.
-        
-        Raises:
-            Exception: Se ocorrer algum erro inesperado.
         """ 
         try:
             doc_ids = [name.split('$')[1] for name in file_names]
 
             self.minio_service.excluir(file_names)
 
+ 
             self.bd_vetorial_service.excluir(doc_ids)   
         
         except Exception as e:
@@ -74,15 +60,10 @@ class AdminService:
     def list_files(self):
         """
         Lista os arquivos do minio.
-        
-        Raises:
-            Exception: Se ocorrer algum erro inesperado.
         """ 
         try:
-
             lista = self.minio_service.listar_arquivos()
             return lista
-        
         except Exception as e:
             print(f"Erro ao baixar arquivo no minio: {e}")
             raise
@@ -90,17 +71,9 @@ class AdminService:
     def download_documents(self, file_name: str):
             """
             Faz o download de um arquivo do minio
-            
-            Args:
-                file_name (str): nome do arquivo/objeto a ser excluído.
-            
-            Raises:
-                Exception: Se ocorrer algum erro inesperado.
             """ 
             try:
-
                 return self.minio_service.download(file_name)
-
             except Exception as e:
-                print(f"Erro ao deletar documentos: {e}")
+                print(f"Erro ao baixar documentos: {e}")
                 raise

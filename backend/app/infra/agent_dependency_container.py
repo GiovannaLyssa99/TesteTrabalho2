@@ -1,5 +1,5 @@
 from app.modules.agent_chat.chat_service import ChatAgentService
-from app.modules.agent_chat.V1_multiagent.fluxo_principal import graph
+from app.modules.agent_chat.V1_multiagent.graph_workflow import graph
 
 def singleton(cls):
     instances = {}

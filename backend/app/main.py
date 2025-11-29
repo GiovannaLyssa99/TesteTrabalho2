@@ -11,7 +11,7 @@ from psycopg.rows import dict_row
 from psycopg_pool import AsyncConnectionPool
 from collections.abc import AsyncGenerator
 #from app.modules.agent_chat.V1_multiagent.fluxo_principal import graph
-from app.modules.agent_chat.V2_multiagent.graph_workflow import graph
+from app.modules.agent_chat.V1_multiagent.graph_workflow import graph
 
 
 @asynccontextmanager

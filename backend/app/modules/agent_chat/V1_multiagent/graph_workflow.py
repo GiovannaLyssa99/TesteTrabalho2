@@ -1,22 +1,20 @@
-from langchain_core.messages import HumanMessage, ToolMessage, AIMessage, BaseMessage
-from langchain_core.prompts.chat import ChatPromptTemplate
+import json
+from langchain_core.messages import ToolMessage, AIMessage, BaseMessage
 from pydantic import BaseModel
-from typing_extensions import TypedDict, Annotated
+from typing_extensions import Annotated
 from langgraph.graph import add_messages
 from langgraph.types import Command
-from langchain_core.runnables import Runnable, RunnableConfig
 from langchain.agents import create_agent
-from typing import  Any, Literal, Optional
-from langchain_core.tools import tool
-from langgraph.runtime import Runtime, get_runtime
+from typing import Any, Literal, Optional
 from langchain.agents.middleware import wrap_tool_call
-from langgraph.types import Command, RunnableConfig
+from langgraph.types import Command
 from langgraph_supervisor import create_supervisor, create_handoff_tool
 from langgraph_supervisor.handoff import create_forward_message_tool
-from app.modules.agent_chat.llm import llm
-from app.infra.config import Config
+from app.modules.agent_chat.llm import get_llm
 from app.infra.core_dependency_container import container
 from app.modules.agent_chat.V1_multiagent.prompts import supervisor_prompt, info_agent_prompt, redacao_agent_prompt
+from langchain.tools import ToolRuntime, tool
+from langmem.short_term import SummarizationNode
 
 qdrant_service = container.bd_vetorial_service
 
@@ -25,14 +23,17 @@ qdrant_service = container.bd_vetorial_service
 class AgentState(BaseModel):
     messages: Annotated[list[BaseMessage], add_messages] = []
     user_profile: dict = {}
-    #profile_fetched: bool = False
-    # review_decision: str = ""      # 'valid' ou 'invalid'
-    # error_feedback: str = ""       # feedback do revisor
+    context: dict[str, Any]
 
 # SCHEMAS
 
-class ContextSchema(TypedDict):
-    user_id: str
+class ContextSchema(BaseModel):
+    user_profile: dict
+
+class SupervisorResponse(BaseModel):
+    message_type: Literal["chat", "checklist_request"]
+    content: str
+    checklist_type: Optional[Literal["simulador_patenteabilidade", "checklist_ineditismo"]] = None
 
 # TOOLS
 
@@ -46,7 +47,7 @@ async def rag_tool(query: str):
     Returns:
         Texto com informações relevantes sobre o tema pesquisado.
     """
-    docs = qdrant_service.buscar(query, search_type="hybrid")
+    docs = qdrant_service.buscar(query)
 
     if not docs:
         print("sem docs")
@@ -59,39 +60,33 @@ async def rag_tool(query: str):
     return "".join(results)
 
 @tool("buscar_perfil_usuario_logado")
-def buscar_perfil_usuario_logado() -> Optional[dict | str]:
+def buscar_perfil_usuario_logado(runtime: ToolRuntime[AgentState, ContextSchema]) -> Command:
     """Busca o perfil do usuário logado."""
 
-    runtime = get_runtime(ContextSchema)
-    user_id = runtime.context.user_id
-    print("user_id" + user_id)
-
-    if not user_id:
-        return "Sem user_id. Sessão anônima"
-
-    # Simula busca
+    tool_call_id = runtime.tool_call_id
     
-    return Command(update={
-        "user_profile": {"nome": "Bruna Borges", "area": "Biotecnologia", "nivel_experiencia": "Intermediário"},
-        "profile_fetched": True
-    })
-    
+    user_profile = runtime.context.user_profile
 
-@tool("coletar_perfil_usuario_anonimo")
-def coletar_perfil_usuario_anonimo() -> Any:
-    """Coleta perfil do usuário anônimo."""
-    
-    perfil = interrupt( 
-        {
-            "mensagem": "Por favor, preencha o formulário de perfil do inventor."
-        }
+    if not user_profile:
+        msg_conteudo = "Sem perfil do inventor"
+        tool_message = ToolMessage(content=msg_conteudo, tool_call_id=tool_call_id)
+        
+        return Command(update={
+            "messages": [tool_message]
+        })
+
+    perfil_para_llm = json.dumps(user_profile, indent=2, ensure_ascii=False)
+
+    tool_message = ToolMessage(
+        content=perfil_para_llm, 
+        tool_call_id=tool_call_id
     )
 
     return Command(update={
-        "user_profile": perfil,
-        "profile_fetched": True
+        "messages": [tool_message],
+        "user_profile": user_profile
     })
-
+    
 #MIDDLEWARES
 
 @wrap_tool_call
@@ -100,7 +95,6 @@ def handle_tool_errors(request, handler):
     try:
         return handler(request)
     except Exception as e:
-        # Return a custom error message to the model
         return ToolMessage(
             content=f"Tool error: Please check your input and try again. ({str(e)})",
             tool_call_id=request.tool_call["id"]
@@ -108,16 +102,26 @@ def handle_tool_errors(request, handler):
 
 # AGENTS
 
+summarization_model = get_llm().bind(max_tokens=512)
+
+summarization_node = SummarizationNode(
+    model=summarization_model,
+    max_tokens=2048,
+    max_tokens_before_summary=20000,
+    max_summary_tokens=512,
+    output_messages_key="llm_input_messages"
+)
+
 info_agent = create_agent(
-    model=llm,
-    tools=[rag_tool],
+    model=get_llm(),
+    tools=[rag_tool, buscar_perfil_usuario_logado],
     system_prompt=info_agent_prompt, 
     context_schema=ContextSchema,
     name="info_agent"
 )
 
 redacao_agent = create_agent(
-    model=llm,
+    model=get_llm(),
     tools=[rag_tool],
     system_prompt=redacao_agent_prompt,
     context_schema=ContextSchema,
@@ -128,18 +132,19 @@ def info_agent_node(state: AgentState):
     result = info_agent.invoke(state)
     return Command(
         update={
-            "messages": state["messages"] + [
+            "messages": [
                 AIMessage(content=result["messages"][-1].content, name="info_agent_node")
             ]
         },
         goto="supervisor",
     )
+# state["messages"] + 
 
 def redaco_agent_node(state: AgentState):
     result = redacao_agent.invoke(state)
     return Command(
         update={
-            "messages": state["messages"] + [
+            "messages": [
                 AIMessage(content=result["messages"][-1].content, name="redaco_agent_node")
             ]
         },
@@ -158,13 +163,17 @@ to_redacao_agent = create_handoff_tool(agent_name="redacao_agent",
 
 forwarding_tool = create_forward_message_tool("supervisor")
 
+#llm_structure_output = get_llm().with_structured_output(SupervisorResponse)
+
 workflow = create_supervisor(
     [redacao_agent, info_agent],
-    model=llm,
+    model=get_llm(),
     prompt=supervisor_prompt,
     tools=[to_info_agent, to_redacao_agent],
     add_handoff_messages=False,
-    output_mode="last_message"
+    output_mode="last_message",
+    response_format=SupervisorResponse, 
+    pre_model_hook=summarization_node
 )
 
 graph = workflow.compile()

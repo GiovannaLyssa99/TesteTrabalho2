@@ -1,15 +1,19 @@
 from dotenv import load_dotenv
 import os
+import asyncio
+from app.infra.database import engine, Base
+import app.modules.usuarios.models
+import app.modules.agent_chat.models
 
 load_dotenv()
 
-from app.infra.database import engine, Base
-import app.modules.usuarios.models
-
-def main():
+async def create_tables():
     print("DATABASE_URL usada:", os.getenv("DATABASE_URL"))
-    Base.metadata.create_all(bind=engine)
+    
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
     print("Tabelas criadas")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(create_tables())

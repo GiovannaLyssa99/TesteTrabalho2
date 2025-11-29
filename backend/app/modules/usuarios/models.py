@@ -24,6 +24,15 @@ class User(Base):
 
     profile = relationship("InventorProfile", back_populates="user", uselist=False, lazy="joined")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "role": self.role,
+            "is_active": self.is_active,
+            "profile": self.profile.to_dict() if self.profile else None
+        }
 
 class InventorProfile(Base):
     __tablename__ = "inventor_profiles"
@@ -38,4 +47,14 @@ class InventorProfile(Base):
     palavras_chave = Column(String(255), nullable=True)
 
     user = relationship("User", back_populates="profile")
-    
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "area_atuacao": self.area_atuacao,
+            "experiencia": self.experiencia,
+            "descricao_inovacao": self.descricao_inovacao,
+            "estagio_inovacao": self.estagio_inovacao,
+            "palavras_chave": self.palavras_chave
+        }

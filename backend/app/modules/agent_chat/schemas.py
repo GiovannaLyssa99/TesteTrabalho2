@@ -1,6 +1,6 @@
 from uuid import UUID
 from pydantic import BaseModel
-from typing import Dict, Optional
+from typing import Dict, Literal, Optional, Union
 from datetime import datetime
 
 # Schemas para endpoints de chat
@@ -23,4 +23,5 @@ class ListaMsgResponse(BaseModel):
 
 class MessageInput(BaseModel):
     thread_id: str
-    content: str | dict
+    content: Union[str, Dict[str, str]]
+    type: Literal["chat", "simulador_patenteabilidade", "checklist_ineditismo"] = "chat"

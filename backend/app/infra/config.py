@@ -12,6 +12,8 @@ class Config:
     MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
     MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY")
 
+    LLM_MODEL = os.getenv("LLM_MODEL")
+
     GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
     DATABASE_URL = os.getenv(

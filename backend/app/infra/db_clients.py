@@ -1,23 +1,18 @@
-from qdrant_client import QdrantClient
+from qdrant_client import QdrantClient, AsyncQdrantClient
 from minio import Minio
 from app.infra.config import Config
 
-# Singleton de Qdrant
-_qdrant_client: QdrantClient | None = None
+_qdrant_client: AsyncQdrantClient | None = None
 
-def get_qdrant_client() -> QdrantClient:
-    """Retorna instância única do cliente Qdrant"""
+def get_qdrant_client() -> AsyncQdrantClient:
+    """Retorna instância única do cliente Qdrant (Assíncrono)"""
     global _qdrant_client
     if _qdrant_client is None:
-        _qdrant_client = QdrantClient(
+        _qdrant_client = AsyncQdrantClient(
             url=Config.QDRANT_URL,
-            api_key=Config.QDRANT_API_KEY
+            api_key=Config.QDRANT_API_KEY,
+            timeout=30
         )
-
-        # Para qdrant rodando local
-        # _qdrant_client = QdrantClient(
-        #     url=Config.QDRANT_URL
-        # )
     return _qdrant_client
 
 # Singleton do MinIO

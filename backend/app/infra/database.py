@@ -22,10 +22,7 @@ Base = declarative_base()
 
 async def get_db():
     async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+        yield session
 
 async def get_db_connection():
     async with engine.connect() as conn:

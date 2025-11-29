@@ -1,0 +1,104 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: chatbot_qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - app_network
+
+  postgres:
+    image: postgres:15
+    container_name: chatbot_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgresinova
+      POSTGRES_DB: db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio
+    container_name: chatbot_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - app_network
+
+  redis:
+    image: redis:alpine
+    container_name: chatbot_redis
+    networks:
+      - app_network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: chatbot_rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - app_network
+
+  backend:
+    build: ./backend
+    container_name: chatbot_backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      qdrant:
+        condition: service_started
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgresinova@postgres:5432/db
+      DB_URI: postgresql://postgres:postgresinova@postgres:5432/db
+      MINIO_ENDPOINT: minio:9000
+      REDIS_HOST: redis
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_API_KEY: ""
+    volumes:
+      - backend_data:/app/data
+      - ./backend/app/modules/base_de_conhecimento/files:/app/app/modules/base_de_conhecimento/files
+    ports:
+      - "8000:8000"
+    networks:
+      - app_network
+
+  frontend:
+    build: ./frontend
+    container_name: chatbot_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+  minio_data:
+  qdrant_data:
+  backend_data:
+
+networks:
+  app_network:
+    driver: bridge

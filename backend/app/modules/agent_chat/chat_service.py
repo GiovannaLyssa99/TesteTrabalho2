@@ -1,7 +1,9 @@
 import asyncio
+import json
 import uuid
 from fastapi import HTTPException
 from app.modules.agent_chat.models import Conversa, Mensagem, MessageType
+from app.modules.usuarios.models import InventorProfile
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.agent_chat.schemas import MessageInput
@@ -10,8 +12,10 @@ from langgraph.types import Command
 from langgraph.checkpoint.postgres import PostgresSaver
 from app.infra.database import get_db_connection, get_db
 from app.infra.config import Config
-from app.modules.agent_chat.V2_multiagent.graph_workflow import graph
-from app.modules.agent_chat.llm import llm
+from app.modules.agent_chat.V1_multiagent.graph_workflow import graph, ContextSchema
+from app.modules.agent_chat.llm import get_llm
+from app.modules.agent_chat.V1_multiagent.checklists_templates import checklist_ineditismo, simulador_patenteabilidade
+from app.modules.agent_chat.V1_multiagent.checklists_analist import analise_patenteabilidade_checklist
 
 class ChatAgentService:
 
@@ -64,29 +68,63 @@ class ChatAgentService:
         if not conversa:
             raise HTTPException(status_code=404, detail="Conversa/thread não encontrada")
 
-        await self.salvar_mensagem(content=msg.content, type=MessageType.HUMAN, thread_id=conversa.thread_id, db=db)
-
-        result = await graph.ainvoke(
-            {"messages": [HumanMessage(msg.content, name="query")]},
-            context={"user_id": conversa.user_id},
-            config={"configurable": {"thread_id": conversa.thread_id}},
-        )
-
-        print(result)
+        profile = await db.scalar(select(InventorProfile).where(InventorProfile.user_id == conversa.user_id))
+        user_profile = profile.to_dict() if profile else None
+        print(f"perfil coletado:{user_profile}")
 
         answer = None
-        for m in reversed(result["messages"]):
-            if m.content and isinstance(m, AIMessage) and not m.response_metadata.get("__is_handoff_back"):
-                answer = m.content
-                break
 
-        print("answer:" + str(answer))
-        await self.salvar_mensagem(content=answer, type=MessageType.AI, thread_id=conversa.thread_id, db=db)
+        if msg.type == "chat":
+
+            await self.salvar_mensagem(content=msg.content, type=MessageType.HUMAN, thread_id=conversa.thread_id, db=db)
+
+            result = await graph.ainvoke(
+                {"messages": [HumanMessage(msg.content, name="query")]},
+                context=ContextSchema(user_profile=user_profile),
+                config={"configurable": {"thread_id": conversa.thread_id}},
+            )
+
+            print(result)
+
+            for m in reversed(result["messages"]):
+                if m.content and isinstance(m, AIMessage) and not m.response_metadata.get("__is_handoff_back"):
+                    answer = json.loads(m.content)
+                    break
+
+            if answer.get("message_type") == "checklist_request":
+                
+                template = simulador_patenteabilidade if answer.get("checklist_type") == "simulador_patenteabilidade" else checklist_ineditismo
+                return {
+                    "thread_id": conversa.thread_id,
+                    "checklist_template": json.dumps(template),
+                    "assistant_message": answer.get("content"),
+                    "message_type": "checklist_request"
+                }
+        
+        elif msg.type in ["simulador_patenteabilidade", "checklist_ineditismo"]:
+
+            template = simulador_patenteabilidade if msg.type == "simulador_patenteabilidade" else checklist_ineditismo
+            checklist_answers = ChatAgentService.formatar_dict_checklist(msg.content, template)
+
+            await self.salvar_mensagem(content=checklist_answers, type=MessageType.CHECKLIST, thread_id=conversa.thread_id, db=db)
+
+            answer = await analise_patenteabilidade_checklist(checklist_answers)
+
+            await graph.ainvoke(
+                {"messages": [AIMessage(content=answer.get("content"))]},
+                config={"configurable": {"thread_id": conversa.thread_id}},
+                )
+
+        else: 
+            raise HTTPException(status_code=500, detail=f"Tipo inválido de mensagem: {msg.type}")
+
+        await self.salvar_mensagem(content=answer.get("content"), type=MessageType.AI, thread_id=conversa.thread_id, db=db)
 
         return {
             "thread_id": conversa.thread_id,
             "user_message": msg.content,
-            "assistant_message": answer,
+            "assistant_message": answer.get("content"),
+            "message_type": "chat"
         }
     
         
@@ -97,7 +135,6 @@ class ChatAgentService:
 
             if not conversas:
                 return []
-                #raise HTTPException(status_code=404, detail="Usuário não possui conversas")
 
             for conversa in conversas:
                 if not conversa.titulo or conversa.titulo.strip() == "":
@@ -122,7 +159,7 @@ class ChatAgentService:
                             f"O título deve ser uma frase concisa. Mensagens: {texts}"
                         )
                         try:
-                            titulo_gerado = await llm.ainvoke(input=prompt)
+                            titulo_gerado = await get_llm().ainvoke(input=prompt)
                             conversa.titulo = titulo_gerado.content
                             db.add(conversa)
                         except Exception as e:
@@ -151,3 +188,36 @@ class ChatAgentService:
             raise
 
         return [{"content": c, "type": t} for c, t in mensagens]
+    
+    @staticmethod
+    def formatar_dict_checklist(answers, template):
+
+        if not template.get("questions"):
+            raise ValueError("O template de checklist fornecido não contém o campo 'questions'.")
+
+        resultado = {}
+
+        for item in template.get("questions"):
+            qid = item.get("id")
+            pergunta = item.get("question")
+
+            if not answers.get(qid):
+                resultado[qid] = {
+                    "question": pergunta,
+                    "answer": None
+                }
+                continue
+
+            resposta = answers.get(qid).strip().upper()
+
+            if resposta not in {"SIM", "NÃO", None}:
+                raise ValueError(
+                    f"Resposta inválida para '{qid}'. Esperado 'SIM' ou 'NÃO', recebido '{resposta}'."
+                )
+
+            resultado[qid] = {
+                "question": pergunta,
+                "answer": resposta
+            }
+
+        return json.dumps(resultado)

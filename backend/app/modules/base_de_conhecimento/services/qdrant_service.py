@@ -6,7 +6,7 @@ class QdrantService:
         self.repository = repository
         self.preprocess_service = preprocess_service
 
-    def inserir(self, bytes: bytes, metadata: dict):
+    async def inserir(self, bytes: bytes, metadata: dict):
         """
         Pré-processa o texto do arquivo e insere os chunks no qdrant.
         
@@ -20,13 +20,13 @@ class QdrantService:
         try:
 
             chunks = self.preprocess_service.preprocess(bytes, metadata)
-            self.repository.insert(chunks)
+            await self.repository.insert(chunks)
 
         except Exception as e:
             print(f"Erro ao inserir doc ao Qdrant: {e}")
             raise
 
-    def excluir(self, doc_ids: list[str]):
+    async def excluir(self, doc_ids: list[str]):
         """
         Exclui os chunks de um ou varios arquivos no qdrant.
         
@@ -39,19 +39,18 @@ class QdrantService:
         try:
 
             for doc_id in doc_ids:
-                self.repository.delete(doc_id)
+                await self.repository.delete(doc_id)
         
         except Exception as e:
             print(f"Erro ao excluir docs no Qdrant: {e}")
             raise
 
-    def buscar(self, query: str, search_type: Literal["hybrid", "naive"]):
+    def buscar(self, query: str):
         """
         Busca os chunks relacionados à query no qdrant.
         
         Args:
             query (str): frase ou pergunta.
-            search_type: ("hybrid", "naive"): tipo de busca a ser feita.
         
         Raises:
             Exception: Se ocorrer algum erro inesperado.
@@ -61,7 +60,7 @@ class QdrantService:
         """ 
         try:
 
-            resultado = self.repository.search(query, search_type)
+            resultado = self.repository.hybrid_search(query)
             
             # for hit in resultado.points:
             #     texto = hit.payload["page_content"]       

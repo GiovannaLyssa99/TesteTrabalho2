@@ -1,11 +1,18 @@
 from langchain_groq import ChatGroq
+from langchain_ollama import ChatOllama
 from app.infra.config import Config
 
-llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    temperature=0.3,
-    api_key=Config.GROQ_API_KEY
-)
+def get_llm(temperature: float = 0.3):
+   
+    # Para testar local via API
+    return ChatGroq(
+        model=Config.LLM_MODEL,
+        temperature=temperature,
+        api_key=Config.GROQ_API_KEY
+    )
 
-
-#llama-3.1-8b-instant
+    # Para rodar o modelo localmente
+    # return ChatOllama(
+    #     model=Config.LLM_MODEL,
+    #     temperature=temperature
+    # )

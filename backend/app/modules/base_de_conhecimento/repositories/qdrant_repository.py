@@ -17,14 +17,14 @@ class QdrantRepository:
     def __init__(self):
         self.client = get_qdrant_client()
 
-    def create_collection(self, dense_embed_size: int):
+    async def create_collection(self, dense_embed_size: int):
         """
         Cria uma collection no Qdrant para os vetores do chatbotinova.
         
         Args:
             dense_embed_size (int): tamanho do vetor gerado pelo modelo de embedding.
         """   
-        self.client.create_collection(
+        await self.client.create_collection(
             self.COLLECTION_NAME,
             vectors_config={
                 self.DENSE_VECTOR_NAME: models.VectorParams(
@@ -39,24 +39,24 @@ class QdrantRepository:
             }
         ) 
 
-        self.client.create_payload_index(
+        await self.client.create_payload_index(
             collection_name=self.COLLECTION_NAME,
             field_name="doc_id",
             field_schema=models.KeywordIndexParams(type="keyword")
         )
 
-        self.client.create_payload_index(
+        await self.client.create_payload_index(
             collection_name=self.COLLECTION_NAME,
             field_name="tags",
             field_schema=models.KeywordIndexParams(type="keyword")
         )   
 
-        collection_info = self.client.get_collection(self.COLLECTION_NAME)
+        collection_info = await self.client.get_collection(self.COLLECTION_NAME)
         print(collection_info.payload_schema)
 
         
 
-    def insert(self, chunks: list[Document]):
+    async def insert(self, chunks: list[Document]):
         """
         Passa chunks pelo processo de embeddings e os insere na collection do Qdrant.
         
@@ -72,8 +72,8 @@ class QdrantRepository:
         dense_embeddings = list(self.DENSE_EMBEDDING_MODEL.passage_embed([chunks[0].page_content]))
         dense_embed_size = len(dense_embeddings[0])
 
-        if not self.client.collection_exists(self.COLLECTION_NAME):
-            self.create_collection(dense_embed_size)
+        if not await self.client.collection_exists(self.COLLECTION_NAME):
+            await self.create_collection(dense_embed_size)
 
         for batch in tqdm.tqdm(self.chunks_iter(chunks, batch_size), 
                             total=len(chunks) // batch_size):
@@ -104,7 +104,7 @@ class QdrantRepository:
                 batch_size=batch_size,  
             )
 
-    def delete(self, doc_id: str):
+    async def delete(self, doc_id: str):
         """
         Deleta todos os chunks de um documento na collection do Qdrant.
         
@@ -121,37 +121,10 @@ class QdrantRepository:
             )
 
         # Deletar points da coleção
-        self.client.delete(
+        await self.client.delete(
             collection_name=self.COLLECTION_NAME,
             points_selector=filter_condition
         )
-
-
-    def search(self, query, search_type):
-        
-        if search_type == "naive":
-            return self.naive_search(query)
-        elif search_type == "hybrid":
-            return self.hybrid_search(query)
-        
-
-    def naive_search(self, query: str):
-        """
-        Busca vetorial de chunks relacionados à query.
-        
-        Args:
-            query (str): pergunta ou frase a ser utilizada para a busca.
-        """         
-        results = self.client.query_points(
-                self.COLLECTION_NAME,
-                query=next(self.DENSE_EMBEDDING_MODEL.query_embed(query)),
-                using=self.DENSE_VECTOR_NAME,
-                limit=10,
-                with_payload=True,
-                score_threshold=0.70
-            )
-        return results
-    
 
     def hybrid_search(self, query: str):
         """

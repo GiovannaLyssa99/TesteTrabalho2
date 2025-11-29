@@ -8,6 +8,7 @@ from app.infra.database import Base
 class MessageType(enum.Enum):
     AI = "ai_message"
     HUMAN = "human_message"
+    CHECKLIST = "checklist"
 
 class Conversa(Base):
     __tablename__ = "conversa"
